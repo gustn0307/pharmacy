@@ -11,10 +11,10 @@ public class DocumentDto {
     private String addressName; // 주소 이름
 
     @JsonProperty("x")
-    private Double longitude; // 경도
+    private double longitude; // 경도
 
     @JsonProperty("y")
-    private Double latitude; // 위도
+    private double latitude; // 위도
 
     @JsonProperty("distance")
     private String distance; // 기준 주소와의 거리
