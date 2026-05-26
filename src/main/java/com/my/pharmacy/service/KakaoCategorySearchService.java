@@ -1,6 +1,8 @@
 package com.my.pharmacy.service;
 
+import com.my.pharmacy.dto.DocumentDto;
 import com.my.pharmacy.dto.KakaoApiResponseDto;
+import com.my.pharmacy.dto.OutputDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +68,44 @@ public class KakaoCategorySearchService {
                         httpEntity,
                         KakaoApiResponseDto.class
                 ).getBody();
+    }
+
+    // documentDtoList를 받아서 outputDto의 리스트로 변환
+    // 각 documentDtoList를 안에 있는 DocumentDto -> OutputDto 변환 후
+    // 다시 OutputDto 리스트에 저장
+    public List<OutputDto> makeOutputDto(List<DocumentDto> documentDtoList) {
+        return documentDtoList
+                .stream()
+                .map(x -> convertToOutputDto(x))
+                .limit(5)
+                .toList();
+    }
+
+    // 각각의 documentDto를 꺼내서 outputDto로 변환
+    private OutputDto convertToOutputDto(DocumentDto documentDto) {
+        String DIRECTION_URL = "https://map.kakao.com/link/map/"; // 길찾기 URL 변수
+        String ROAD_VIEW_URL = "https://map.kakao.com/link/roadview/"; // 로드뷰 URL 변수
+
+        String params = String.join(",",
+                documentDto.getPlaceName(),
+                String.valueOf(documentDto.getLatitude()),
+                String.valueOf(documentDto.getLongitude()));
+
+        // /link/map/이름,위도,경도
+        String mapUrl = UriComponentsBuilder
+                .fromUriString(DIRECTION_URL + params)
+                .toUriString();
+
+        // /link/map/위도,경도
+        String roadUrl = ROAD_VIEW_URL + documentDto.getLatitude() + "," + documentDto.getLongitude();
+
+        return OutputDto.builder()
+                .pharmacyName(documentDto.getPlaceName())
+                .pharmacyAddress(documentDto.getAddressName())
+                .pharmacyPhone(documentDto.getPhone())
+                .distance(documentDto.getDistance())
+                .directionUrl(mapUrl)
+                .roadViewUrl(roadUrl)
+                .build();
     }
 }

@@ -2,14 +2,18 @@ package com.my.pharmacy.controller;
 
 import com.my.pharmacy.dto.DocumentDto;
 import com.my.pharmacy.dto.KakaoApiResponseDto;
+import com.my.pharmacy.dto.OutputDto;
 import com.my.pharmacy.service.KakaoAddressSearchService;
 import com.my.pharmacy.service.KakaoCategorySearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -32,7 +36,7 @@ public class FormController {
     }
 
     @PostMapping("/search")
-    public String searchAddress(@RequestParam("address") String address) {
+    public String searchAddress(@RequestParam("address") String address, Model model) {
         // 1. 입력받은 주소로 위도, 경도 값 얻어오기
         KakaoApiResponseDto kakaoApiResponseDto = kakaoAddressSearchService.requestAddressSearch(address);
         log.info("검색 결과 : " + kakaoApiResponseDto);
@@ -48,6 +52,12 @@ public class FormController {
                         documentDto.getLongitude()
                 );
         log.info("카테고리 검색 결과 : " + kakaoApiCategoryDto);
+
+        // 받아온 약국 정보들을 출력 양식(OutputDto)에 맞춰 변환 후 모델에 담아 HTML에 전달
+        List<OutputDto> outputDtoList = kakaoCategorySearchService
+                .makeOutputDto(kakaoApiCategoryDto.getDocumentDtoList());
+        model.addAttribute("outputList", outputDtoList);
+
         return "output";
     }
 

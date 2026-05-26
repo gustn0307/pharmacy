@@ -11,9 +11,10 @@ import java.util.List;
 @Setter
 @ToString
 public class KakaoApiResponseDto {
-    @JsonProperty("documents")
-    private List<DocumentDto> documentDtoList;
 
     @JsonProperty("meta")
     private MetaDto metaDto;
+
+    @JsonProperty("documents")
+    private List<DocumentDto> documentDtoList;
 }
